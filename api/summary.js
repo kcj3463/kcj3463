@@ -1,33 +1,30 @@
 export default async function handler(req, res) {
-  const { text } = req.query;
+  const apiKey = process.env.OPENAI_API_KEY;
+  const text = req.query.text;
 
-  if (!text) {
-    return res.status(400).json({ error: "text 파라미터가 필요합니다." });
+  if (!apiKey || !text) {
+    return res.status(400).json({ error: "API key or text missing" });
   }
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: `다음 내용을 요약해줘:\n${text}` }],
+        messages: [{ role: "user", content: `다음을 한국어로 요약:\n\n${text}` }],
         temperature: 0.7
       })
     });
 
-    const data = await response.json();
+    const result = await response.json();
+    const summary = result.choices?.[0]?.message?.content?.trim() || "요약 실패";
 
-    if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ error: "요약 실패", detail: data });
-    }
-
-    return res.status(200).json({ summary: data.choices[0].message.content });
-
-  } catch (error) {
-    return res.status(500).json({ error: "서버 오류", detail: error.message });
+    res.status(200).json({ summary });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
