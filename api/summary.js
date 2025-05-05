@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = sk-...sdYA;
   const text = req.query.text;
 
   if (!apiKey || !text) {
