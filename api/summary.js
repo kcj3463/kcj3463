@@ -1,30 +1,31 @@
-export default async function handler(req, res) {
-  const apiKey = sk-...sdYA;
-  const text = req.query.text;
 
-  if (!apiKey || !text) {
-    return res.status(400).json({ error: "API key or text missing" });
+ import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  apiKey: sk-...sdYA,
+});
+const openai = new OpenAIApi(configuration);
+
+export default async function handler(req, res) {
+  const { text } = req.query;
+
+  if (!text) {
+    return res.status(400).json({ error: "No input text provided." });
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: `다음을 한국어로 요약:\n\n${text}` }],
-        temperature: 0.7
-      })
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "다음 문장을 간결하게 요약해 주세요." },
+        { role: "user", content: text },
+      ],
     });
 
-    const result = await response.json();
-    const summary = result.choices?.[0]?.message?.content?.trim() || "요약 실패";
-
+    const summary = completion.data.choices[0].message.content.trim();
     res.status(200).json({ summary });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Summary generation failed." });
   }
 }
