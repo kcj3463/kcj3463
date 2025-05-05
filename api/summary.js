@@ -1,8 +1,7 @@
-
- import { Configuration, OpenAIApi } from "openai";
+import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
-  apiKey: sk-...sdYA,
+  apiKey: "sk-...sdYA", // 여기에 실제 API 키 입력
 });
 const openai = new OpenAIApi(configuration);
 
